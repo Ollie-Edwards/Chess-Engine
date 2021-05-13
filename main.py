@@ -11,7 +11,7 @@ colour2 = (118,150,86)
 startRow = 0
 startCol = 0
 
-drag = False ## whether or not a piece has been clicked
+clicked = False ## whether or not a piece has been clicked
 
 '''
 side to move = uppercase 
@@ -47,7 +47,7 @@ def drawpiece(piece, row, col):
     piece = pygame.transform.scale(piece, (BOXSIZE, BOXSIZE)) 
     window.blit(piece, (row*BOXSIZE, col*BOXSIZE))
 
-def drawBoard():
+def drawSquares():
     ## draw boxes
     
     for row in range(WIDTH//BOXSIZE):
@@ -66,7 +66,7 @@ def drawBoard():
             rect = pygame.Rect(row*BOXSIZE, col*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
             pygame.draw.rect(window, colour, rect)
 
-            ## draw pieces
+def drawPieces():
     for row in range(WIDTH//BOXSIZE):
         for col in range(HEIGHT//BOXSIZE):
             letter = str(board[col][row])  # the character representation of the chess piece eg. k, n, p esc
@@ -162,26 +162,21 @@ while True:
         if event.type == pygame.QUIT: 
             pygame.quit()
 
-        mousex, mousey = pygame.mouse.get_pos()
-        clickedRow = mousex//BOXSIZE
-        clickedCol = mousey//BOXSIZE
+        if pygame.MOUSEBUTTONDOWN: # left click
+            mousex, mousey = pygame.mouse.get_pos()
+            clickedRow = mousex//BOXSIZE
+            clickedCol = mousey//BOXSIZE
 
-        if pygame.mouse.get_pressed()[0]: # left click
-            if drag == False:
-                startCol = clickedCol
-                startRow = clickedRow
+            clicked = True
+            startCol = clickedCol
+            startRow = clickedRow
 
-                board[startCol][startRow] = [""]
+    drawSquares()
 
-                print(f"picked up {startCol}, {startRow}")
-                drag = True
-            else:
-                endCol, endRow = clickedCol, clickedRow
-
-                move(startRow, startCol, endRow, endCol)
-                print('placed')
-                drag = False
-
-    drawBoard()
-    clock.tick(5)
+    if clicked: # this checks whether the board has been clicked since startup
+        rect = pygame.Rect(startRow*BOXSIZE, startCol*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
+        pygame.draw.rect(window, (255, 0, 0, 128), rect)
+        
+    drawPieces()
+    clock.tick(20)
     pygame.display.update()
