@@ -103,10 +103,11 @@ def isValid():
 
 def move(startRow, startCol, endRow, endCol):
     # isValid()
-    piece = board[startRow][startCol]
+    piece = board[startCol][startRow]
     if piece != []:
-        board[startCol][startRow] = []
+        board[startCol][startRow] = "!"
         board[endCol][endRow] = piece
+
 
 def parseFEN(boardPositions):
     FEN = ''
@@ -162,20 +163,28 @@ while True:
         if event.type == pygame.QUIT: 
             pygame.quit()
 
-        if pygame.MOUSEBUTTONDOWN: # left click
+        if pygame.mouse.get_pressed()[0]: # left click
             mousex, mousey = pygame.mouse.get_pos()
             clickedRow = mousex//BOXSIZE
             clickedCol = mousey//BOXSIZE
 
-            clicked = True
-            startCol = clickedCol
-            startRow = clickedRow
+            print(board[clickedCol][clickedRow])
+
+            if clicked: # clicked shows if a piece has been selected
+                move(startRow, startCol, clickedRow, clickedCol)
+                clicked = False
+                pygame.time.delay(50)
+                print("\n")
+            else:
+                startCol = clickedCol
+                startRow = clickedRow
+                clicked = True
 
     drawSquares()
 
     if clicked: # this checks whether the board has been clicked since startup
-        rect = pygame.Rect(startRow*BOXSIZE, startCol*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
-        pygame.draw.rect(window, (255, 0, 0, 128), rect)
+        rect = pygame.Rect(clickedRow*BOXSIZE, clickedCol*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
+        pygame.draw.rect(window, (0, 128, 0), rect)
         
     drawPieces()
     clock.tick(20)
