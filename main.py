@@ -1,7 +1,7 @@
 import pygame
-from pygame import color
-from pygame import draw
-from pygame.mixer import pre_init
+# from pygame import color
+# from pygame import draw
+# from pygame.mixer import pre_init
 
 WIDTH = 400
 HEIGHT = 400
