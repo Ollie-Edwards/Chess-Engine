@@ -34,19 +34,19 @@ queen = q
 king = k
 '''
 
-blackBishop = pygame.image.load(r"Chess\Sprites\blackBishop.png")
-blackKing = pygame.image.load(r"Chess\Sprites\blackKing.png")
-blackKnight = pygame.image.load(r"Chess\Sprites\blackKnight.png")
-blackPawn = pygame.image.load(r"Chess\Sprites\blackPawn.png")
-blackQueen = pygame.image.load(r"Chess\Sprites\blackQueen.png")
-blackRook = pygame.image.load(r"Chess\Sprites\blackRook.png")
+blackBishop = pygame.image.load(r"Chess-Engine\Sprites\blackBishop.png")
+blackKing = pygame.image.load(r"Chess-Engine\Sprites\blackKing.png")
+blackKnight = pygame.image.load(r"Chess-Engine\Sprites\blackKnight.png")
+blackPawn = pygame.image.load(r"Chess-Engine\Sprites\blackPawn.png")
+blackQueen = pygame.image.load(r"Chess-Engine\Sprites\blackQueen.png")
+blackRook = pygame.image.load(r"Chess-Engine\Sprites\blackRook.png")
 
-whiteBishop = pygame.image.load(r"Chess\Sprites\whiteBishop.png")
-whiteKing = pygame.image.load(r"Chess\Sprites\whiteKing.png")
-whiteKnight = pygame.image.load(r"Chess\Sprites\whiteKnight.png")
-whitePawn = pygame.image.load(r"Chess\Sprites\whitePawn.png")
-whiteQueen = pygame.image.load(r"Chess\Sprites\whiteQueen.png")
-whiteRook = pygame.image.load(r"Chess\Sprites\whiteRook.png")
+whiteBishop = pygame.image.load(r"Chess-Engine\Sprites\whiteBishop.png")
+whiteKing = pygame.image.load(r"Chess-Engine\Sprites\whiteKing.png")
+whiteKnight = pygame.image.load(r"Chess-Engine\Sprites\whiteKnight.png")
+whitePawn = pygame.image.load(r"Chess-Engine\Sprites\whitePawn.png")
+whiteQueen = pygame.image.load(r"Chess-Engine\Sprites\whiteQueen.png")
+whiteRook = pygame.image.load(r"Chess-Engine\Sprites\whiteRook.png")
 
 def drawpiece(piece, row, col):
     piece = pygame.transform.scale(piece, (BOXSIZE, BOXSIZE)) 
