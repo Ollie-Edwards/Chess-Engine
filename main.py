@@ -72,35 +72,6 @@ board = [
     [["R"],["B"],["N"],["K"],["Q"],["N"],["B"],["R"]]
 ]
 
-'''
-
-def checkEnd(): # checks whether the board is complete or at the end of a row... returns true if the board is finshed and updates row and col values
-    global rowNum
-    global colNum
-    if rowNum == 8:
-        rowNum = 0
-        colNum += 1
-    if colNum > 8:
-        return (True) #true for end 
-    else:
-        return (False)
-
-def parseFEN(boardPositions):
-    letter = boardPositions[int(rowNum+colNum*8)]
-    if checkEnd():
-        return board
-    else:
-        try:
-            letter = int(letter)
-            for i in range(letter):
-                if checkEnd():
-                    return board
-        except:
-            board[rowNum][colNum] = letter
-
-print(parseFEN(boardPositions))
-
-'''
 def drawBoard():
     ## draw boxes
     
