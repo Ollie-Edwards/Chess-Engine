@@ -1,4 +1,6 @@
 import pygame
+from pygame import mouse
+from pygame.surfarray import pixels_red
 
 WIDTH = 400
 HEIGHT = 400
@@ -13,10 +15,32 @@ startCol = 0
 
 clicked = False ## whether or not a piece has been clicked
 
-'''
-side to move = uppercase 
+blackBishop = pygame.image.load(r"Chess\Sprites\blackBishop.png")
+blackKing = pygame.image.load(r"Chess\Sprites\blackKing.png")
+blackKnight = pygame.image.load(r"Chess\Sprites\blackKnight.png")
+blackPawn = pygame.image.load(r"Chess\Sprites\blackPawn.png")
+blackQueen = pygame.image.load(r"Chess\Sprites\blackQueen.png")
+blackRook = pygame.image.load(r"Chess\Sprites\blackRook.png")
+ 
+whiteBishop = pygame.image.load(r"Chess\Sprites\whiteBishop.png")
+whiteKing = pygame.image.load(r"Chess\Sprites\whiteKing.png")
+whiteKnight = pygame.image.load(r"Chess\Sprites\whiteKnight.png")
+whitePawn = pygame.image.load(r"Chess\Sprites\whitePawn.png")
+whiteQueen = pygame.image.load(r"Chess\Sprites\whiteQueen.png")
+whiteRook = pygame.image.load(r"Chess\Sprites\whiteRook.png")
 
-None = . 
+sprites = {
+    "p":blackPawn, "P":whitePawn,
+    "n":blackKnight, "N":whiteKnight,
+    "b":blackBishop, "B":whiteBishop,
+    "r":blackRook, "R":whiteRook,
+    "q":blackQueen, "Q":whiteQueen,
+    "k":blackKing, "K":whiteKing,
+    "!":"!"
+}
+
+'''
+white = uppercase 
 pawn = p
 knight = n
 bishop = b
@@ -26,23 +50,29 @@ king = k
 none = !
 '''
 
-blackBishop = pygame.image.load(r"Chess-Engine\Sprites\blackBishop.png")
-blackKing = pygame.image.load(r"Chess-Engine\Sprites\blackKing.png")
-blackKnight = pygame.image.load(r"Chess-Engine\Sprites\blackKnight.png")
-blackPawn = pygame.image.load(r"Chess-Engine\Sprites\blackPawn.png")
-blackQueen = pygame.image.load(r"Chess-Engine\Sprites\blackQueen.png")
-blackRook = pygame.image.load(r"Chess-Engine\Sprites\blackRook.png")
+class Piece:
+    def __init__(self, piece, row, col):
+        self.row = row
+        self.col = col
+        self.piece = piece
 
-whiteBishop = pygame.image.load(r"Chess-Engine\Sprites\whiteBishop.png")
-whiteKing = pygame.image.load(r"Chess-Engine\Sprites\whiteKing.png")
-whiteKnight = pygame.image.load(r"Chess-Engine\Sprites\whiteKnight.png")
-whitePawn = pygame.image.load(r"Chess-Engine\Sprites\whitePawn.png")
-whiteQueen = pygame.image.load(r"Chess-Engine\Sprites\whiteQueen.png")
-whiteRook = pygame.image.load(r"Chess-Engine\Sprites\whiteRook.png")
+    def Move(self, endRow, endCol):
+        board[endCol][endRow] = self
+        board[self.col][self.row] = Piece('!', self.row, self.col)
+        self.col = endCol
+        self.row = endRow
+
+def checkForPromotion():
+    for row in range(8):
+        for col in range(8):
+            piece = board[row][col]
+            if piece.piece == "P" and piece.col == 0:
+                board[piece.col][piece.row].piece = "Q"
+            if piece.piece == "p" and piece.col == 7:
+                board[piece.col][piece.row].piece = "q"
 
 #normal chess starting position
 #rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-
 def drawpiece(piece, row, col):
     piece = pygame.transform.scale(piece, (BOXSIZE, BOXSIZE)) 
     window.blit(piece, (row*BOXSIZE, col*BOXSIZE))
@@ -67,47 +97,15 @@ def drawSquares():
             pygame.draw.rect(window, colour, rect)
 
 def drawPieces():
-    for row in range(WIDTH//BOXSIZE):
-        for col in range(HEIGHT//BOXSIZE):
-            letter = str(board[col][row])  # the character representation of the chess piece eg. k, n, p esc
+    for row in range(8):
+        for col in range(8):
+            try:
+                letter = board[col][row].piece  # the character representation of the chess piece eg. k, n, p esc
+            except:
+                print(board[col][row])
 
-            if letter == "p":
-                drawpiece(blackPawn, row, col)
-            if letter == "n":
-                drawpiece(blackKnight, row, col)
-            if letter == "b":
-                drawpiece(blackBishop, row, col)
-            if letter == "r":
-                drawpiece(blackRook, row, col)
-            if letter == "q":
-                drawpiece(blackQueen, row, col)
-            if letter == "k":
-                drawpiece(blackKing, row, col)
-            if letter == "P":
-                drawpiece(whitePawn, row, col)
-            if letter == "N":
-                drawpiece(whiteKnight, row, col)
-            if letter == "B":
-                drawpiece(whiteBishop, row, col)
-            if letter == "R":
-                drawpiece(whiteRook, row, col)
-            if letter == "Q":
-                drawpiece(whiteQueen, row, col)
-            if letter == "K":
-                drawpiece(whiteKing, row, col)  
-            if letter == "!":
-                pass
-
-def isValid():
-    pass
-
-def move(startRow, startCol, endRow, endCol):
-    # isValid()
-    piece = board[startCol][startRow]
-    if piece != []:
-        board[startCol][startRow] = "!"
-        board[endCol][endRow] = piece
-
+            if letter != "!":
+                drawpiece(sprites[letter], row, col)
 
 def parseFEN(boardPositions):
     FEN = ''
@@ -122,12 +120,12 @@ def parseFEN(boardPositions):
     if len(FEN) != 64:
         raise pygame.error('invalid FEN input')
 
+    board = ([[[]for i in range(8)]for i in range(8)])
     currentCol = 0
     currentRow = 0
-    board = ([[[]for i in range(8)]for i in range(8)])
     for letter in FEN:
 
-        board[currentCol][currentRow] = letter
+        board[currentCol][currentRow] = Piece(letter,currentRow, currentCol)
         currentRow += 1
 
         if currentRow == 8:
@@ -152,40 +150,53 @@ board = parseFEN(boardPositions)
 
 ###############################################################################
 
-################################## Main loop ##################################
-
 pygame.init()
 clock = pygame.time.Clock()
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
+drag = False
+clickedPieceSprite = blackKing
+clickedPiece = None
+
+startRow = 0 # the row/col of where the most recent piece has been moved from
+startCol = 0
+
+################################## Main loop ##################################
+
 while True:
+
+    ## DRAW ##
+    drawSquares()
+    drawPieces()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             pygame.quit()
 
-        if pygame.mouse.get_pressed()[0]: # left click
-            mousex, mousey = pygame.mouse.get_pos()
-            clickedRow = mousex//BOXSIZE
-            clickedCol = mousey//BOXSIZE
+        mousex, mousey = pygame.mouse.get_pos()
+        clickedRow = mousex//BOXSIZE
+        clickedCol = mousey//BOXSIZE
 
-            print(board[clickedCol][clickedRow])
-
-            if clicked: # clicked shows if a piece has been selected
-                move(startRow, startCol, clickedRow, clickedCol)
-                clicked = False
-                pygame.time.delay(50)
-                print("\n")
-            else:
-                startCol = clickedCol
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if pygame.mouse.get_pressed() != (False, False, False):
+                drag = True
                 startRow = clickedRow
-                clicked = True
+                startCol = clickedCol
+                clickedPieceSprite = sprites[board[clickedCol][clickedRow].piece]
+                clickedPiece = board[clickedCol][clickedRow]
 
-    drawSquares()
+        if event.type == pygame.MOUSEBUTTONUP:
+            drag = False
+            if clickedPiece != None:
+                board[clickedCol][clickedRow] = clickedPiece
+                board[startCol][startRow] = Piece("!", startRow, startCol) # empty node
+        
+        if drag:
+            window.blit(clickedPieceSprite, (mousex-22.5, mousey-22.5))
 
     if clicked: # this checks whether the board has been clicked since startup
         rect = pygame.Rect(clickedRow*BOXSIZE, clickedCol*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
         pygame.draw.rect(window, (0, 128, 0), rect)
-        
-    drawPieces()
+    
     clock.tick(20)
     pygame.display.update()
