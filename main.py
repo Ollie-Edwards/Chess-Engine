@@ -1,6 +1,4 @@
 import pygame
-from pygame import mouse
-from pygame.surfarray import pixels_red
 
 WIDTH = 400
 HEIGHT = 400
@@ -164,6 +162,7 @@ startCol = 0
 ################################## Main loop ##################################
 
 while True:
+    checkForPromotion()
 
     ## DRAW ##
     drawSquares()
@@ -189,6 +188,8 @@ while True:
             drag = False
             if clickedPiece != None:
                 board[clickedCol][clickedRow] = clickedPiece
+                board[clickedCol][clickedRow].row = clickedRow
+                board[clickedCol][clickedRow].col = clickedCol
                 board[startCol][startRow] = Piece("!", startRow, startCol) # empty node
         
         if drag:
