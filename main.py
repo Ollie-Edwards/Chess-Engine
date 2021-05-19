@@ -5,13 +5,15 @@ HEIGHT = 400
 
 BOXSIZE = WIDTH//8
 
-colour1 = (238,238,210) # 241, 218, 179
-colour2 = (118,150,86) # 182, 136, 96
+colour1 = (118,150,86) # 182, 136, 96
+colour2 = (238,238,210) # 241, 218, 179
 
 startRow = 0
 startCol = 0
 
 clicked = False ## whether or not a piece has been clicked
+
+totalMoveNumber = 0
 
 blackBishop = pygame.image.load(r"Chess\Sprites\blackBishop.png")
 blackKing = pygame.image.load(r"Chess\Sprites\blackKing.png")
@@ -26,8 +28,6 @@ whiteKnight = pygame.image.load(r"Chess\Sprites\whiteKnight.png")
 whitePawn = pygame.image.load(r"Chess\Sprites\whitePawn.png")
 whiteQueen = pygame.image.load(r"Chess\Sprites\whiteQueen.png")
 whiteRook = pygame.image.load(r"Chess\Sprites\whiteRook.png")
-
-blueSquare = pygame.image.load(r"Chess\Sprites\BlueSquare.png")
 
 sprites = {
     "p":blackPawn, "P":whitePawn,
@@ -311,16 +311,19 @@ while True:
                 startCol = clickedCol
                 clickedPieceSprite = sprites[board[clickedCol][clickedRow].piece]
                 clickedPiece = board[clickedCol][clickedRow]
-
+ 
         if event.type == pygame.MOUSEBUTTONUP:
             drag = False
             if clickedPiece != None:
                 if (clickedRow, clickedCol) in isLegal(clickedPiece):
-                    board[clickedCol][clickedRow] = clickedPiece
-                    board[clickedCol][clickedRow].row = clickedRow
-                    board[clickedCol][clickedRow].col = clickedCol
-                    board[clickedCol][clickedRow].numberOfMoves += 1
-                    board[startCol][startRow] = Piece("!", startRow, startCol) # empty node
+                    if (totalMoveNumber % 2 == 0 and clickedPiece.piece.isupper()) or (totalMoveNumber % 2 != 0 and clickedPiece.piece.islower()):
+                
+                        board[clickedCol][clickedRow] = clickedPiece
+                        board[clickedCol][clickedRow].row = clickedRow
+                        board[clickedCol][clickedRow].col = clickedCol
+                        board[clickedCol][clickedRow].numberOfMoves += 1
+                        board[startCol][startRow] = Piece("!", startRow, startCol) # empty node
+                        totalMoveNumber += 1
         
         if drag:
             if clickedPieceSprite != "!":
