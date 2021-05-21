@@ -22,19 +22,19 @@ clicked = False ## whether or not a piece has been clicked
 totalMoveNumber = 0
 fullMoveNumber = 0
 
-blackBishop = pygame.image.load(r"Chess\Sprites\blackBishop.png")
-blackKing = pygame.image.load(r"Chess\Sprites\blackKing.png")
-blackKnight = pygame.image.load(r"Chess\Sprites\blackKnight.png")
-blackPawn = pygame.image.load(r"Chess\Sprites\blackPawn.png")
-blackQueen = pygame.image.load(r"Chess\Sprites\blackQueen.png")
-blackRook = pygame.image.load(r"Chess\Sprites\blackRook.png")
+blackBishop = pygame.image.load(r"Sprites\blackBishop.png")
+blackKing = pygame.image.load(r"Sprites\blackKing.png")
+blackKnight = pygame.image.load(r"Sprites\blackKnight.png")
+blackPawn = pygame.image.load(r"Sprites\blackPawn.png")
+blackQueen = pygame.image.load(r"Sprites\blackQueen.png")
+blackRook = pygame.image.load(r"Sprites\blackRook.png")
  
-whiteBishop = pygame.image.load(r"Chess\Sprites\whiteBishop.png")
-whiteKing = pygame.image.load(r"Chess\Sprites\whiteKing.png")
-whiteKnight = pygame.image.load(r"Chess\Sprites\whiteKnight.png")
-whitePawn = pygame.image.load(r"Chess\Sprites\whitePawn.png")
-whiteQueen = pygame.image.load(r"Chess\Sprites\whiteQueen.png")
-whiteRook = pygame.image.load(r"Chess\Sprites\whiteRook.png")
+whiteBishop = pygame.image.load(r"Sprites\whiteBishop.png")
+whiteKing = pygame.image.load(r"Sprites\whiteKing.png")
+whiteKnight = pygame.image.load(r"Sprites\whiteKnight.png")
+whitePawn = pygame.image.load(r"Sprites\whitePawn.png")
+whiteQueen = pygame.image.load(r"Sprites\whiteQueen.png")
+whiteRook = pygame.image.load(r"Sprites\whiteRook.png")
 
 sprites = {
     "p":blackPawn, "P":whitePawn,
@@ -55,10 +55,6 @@ queen = q
 king = k
 none = !
 '''
-
-pygame.init()
-clock = pygame.time.Clock()
-window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 totalMoveNumber = 0
 drag = False
@@ -356,6 +352,10 @@ def movePiece(startrow, startcol, endrow, endcol):
 ###################### getting starting board positions ######################
 
 FENinput = input('enter FEN notation code or type none: ')
+
+pygame.init()
+clock = pygame.time.Clock()
+window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 #normal chess starting position
 #rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
