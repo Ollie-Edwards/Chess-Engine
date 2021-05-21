@@ -1,15 +1,18 @@
 import pygame
 
+from API import *
+check()
+
 WIDTH = 400
 HEIGHT = 400
 
 BOXSIZE = WIDTH//8
 
 #colour1 = (118,150,86)
-#colour2 = (238,238,210)
+colour2 = (238,238,210)
 
 colour1 = (182, 136, 96)
-colour2 = (241, 218, 179)
+#colour2 = (241, 218, 179)
 
 startRow = 0
 startCol = 0
@@ -17,6 +20,7 @@ startCol = 0
 clicked = False ## whether or not a piece has been clicked
 
 totalMoveNumber = 0
+fullMoveNumber = 0
 
 blackBishop = pygame.image.load(r"Chess\Sprites\blackBishop.png")
 blackKing = pygame.image.load(r"Chess\Sprites\blackKing.png")
@@ -39,9 +43,8 @@ sprites = {
     "r":blackRook, "R":whiteRook,
     "q":blackQueen, "Q":whiteQueen,
     "k":blackKing, "K":whiteKing,
-    "!":"!"
+    "!":None
 }
-
 '''
 white = uppercase 
 pawn = p
@@ -53,6 +56,14 @@ king = k
 none = !
 '''
 
+pygame.init()
+clock = pygame.time.Clock()
+window = pygame.display.set_mode((WIDTH, HEIGHT))
+
+totalMoveNumber = 0
+drag = False
+draggedPiece = None
+
 class Piece:
     def __init__(self, piece, row, col):
         self.row = row
@@ -60,11 +71,48 @@ class Piece:
         self.piece = piece
         self.numberOfMoves = 0
 
-    def Move(self, endRow, endCol):
-        board[endCol][endRow] = self
-        board[self.col][self.row] = Piece('!', self.row, self.col)
-        self.col = endCol
-        self.row = endRow
+def getFEN(board):
+    #return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    prevRow = 0
+    NewFEN = ''
+    for row in range(8):
+        for col in range(8):
+            if prevRow != row:
+                NewFEN += "/"
+            prevRow = row
+            item = board[row][col].piece
+            if item == "!":
+                NewFEN += "1"
+            else:
+                NewFEN += item
+
+    string=NewFEN #single string
+    newstring="" #null
+    count1 = 0 #count of 1s
+    flag = False #boolean flag - checks if change in string
+
+    for i in range (len(string)): #iterate through string
+        if string[i] == "1": #check for 1s and increment count if so
+            count1 = count1 + 1
+            flag = True #set change flag to True
+
+        elif count1 != 0 and string[i] != "1": #generate new string
+            newstring = newstring + str(count1) + string[i]
+            count1 = 0 # reset count
+
+        elif count1 == 0 and string[i] != "1": #special case capture, no 1s at start
+            newstring = newstring + string[i]
+
+    if count1 != 0: #checks if final count is 0, i.e. reset
+        newstring = newstring + str(count1)
+
+    if flag == False:
+        print(newstring+" w - - 0 1") #output if no changes made
+        return (newstring+" w - - 0 1")
+
+    else:
+        print(newstring+" w - - 0 1") #output new string
+        return (newstring+" w - - 0 1")
 
 def checkForPromotion():
     for row in range(8):
@@ -75,15 +123,11 @@ def checkForPromotion():
             if piece.piece == "p" and piece.col == 7:
                 board[piece.col][piece.row].piece = "q"
 
-#normal chess starting position
-#rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 def drawpiece(piece, row, col):
     piece = pygame.transform.scale(piece, (BOXSIZE, BOXSIZE)) 
     window.blit(piece, (row*BOXSIZE, col*BOXSIZE))
 
-def drawSquares():
-    ## draw boxes
-    
+def drawSquares(): ## draw boxes
     for row in range(WIDTH//BOXSIZE):
         for col in range(HEIGHT//BOXSIZE):
             if row % 2 == 0:
@@ -141,17 +185,13 @@ def Getpiece(row, col): #returns the piece in the given row and col
     else:
         return piece
 
-def isLegal(piece):
-    ## ill just worry about white pieces for now
-  
+def isLegal(piece):  
     # + row --> right
     # - row --> left
     # + col --> down
     # - col --> up
 
-    verticalDirection = 1 # is this is -1 the column numbers will be the negative verson of themself, instead of moving up they will move down
-                        # this means that you the legal moves for black pieces can be calcualted without having to rewrite the code
-                        # 1 for white pieces and -1 for black pieces
+    verticalDirection = 1 # if this is -1 the col/row numbers will be the negative verson of themself, instead of move up --> move down, left --> right
 
     legalMoves = []
 
@@ -215,9 +255,7 @@ def isLegal(piece):
             for j in possibleMoves:
                 try:
                     targetPiece = Getpiece(j[0], j[1])
-
-                    print(targetPiece)
-                    if (targetPiece == None) or (clickedPiece.piece.isupper() and targetPiece.islower()) or (clickedPiece.piece.islower() and targetPiece.isupper()): # up/down 2 right 1
+                    if (targetPiece == None) or (drag.piece.isupper() and targetPiece.islower()) or (draggedPiece.piece.islower() and targetPiece.isupper()): # up/down 2 right 1
                         legalMoves.append((j))
                 except:
                     pass
@@ -231,10 +269,10 @@ def isLegal(piece):
                     targetPiece = Getpiece(piece.row+i, piece.col+i*verticalDirection)
                     if (targetPiece == None):
                         legalMoves.append((piece.row+i, piece.col+i*verticalDirection))
-                    if (clickedPiece.piece.isupper() and targetPiece.islower()) or (clickedPiece.piece.islower() and targetPiece.isupper()):
+                    if (draggedPiece.piece.isupper() and targetPiece.islower()) or (draggedPiece.piece.islower() and targetPiece.isupper()):
                         legalMoves.append((piece.row+i, piece.col+i*verticalDirection))
                         break
-                    if (clickedPiece.piece.isupper() and targetPiece.isupper()) or (clickedPiece.piece.islower() and targetPiece.islower()):
+                    if (draggedPiece.piece.isupper() and targetPiece.isupper()) or (draggedPiece.piece.islower() and targetPiece.islower()):
                         break
                 except:
                     pass
@@ -243,10 +281,10 @@ def isLegal(piece):
                     targetPiece = Getpiece(piece.row-i, piece.col+i*verticalDirection)
                     if (targetPiece == None):
                         legalMoves.append((piece.row-i, piece.col+i*verticalDirection))
-                    if (clickedPiece.piece.isupper() and targetPiece.islower()) or (clickedPiece.piece.islower() and targetPiece.isupper()):
+                    if (draggedPiece.piece.isupper() and targetPiece.islower()) or (draggedPiece.piece.islower() and targetPiece.isupper()):
                         legalMoves.append((piece.row-i, piece.col+i*verticalDirection))
                         break
-                    if (clickedPiece.piece.isupper() and targetPiece.isupper()) or (clickedPiece.piece.islower() and targetPiece.islower()):
+                    if (draggedPiece.piece.isupper() and targetPiece.isupper()) or (draggedPiece.piece.islower() and targetPiece.islower()):
                         break
                 except:
                     pass
@@ -261,10 +299,10 @@ def isLegal(piece):
                     if (targetPiece == None):
                         legalMoves.append((piece.row, piece.col+i*verticalDirection))
 
-                    if (clickedPiece.piece.isupper() and targetPiece.islower()) or (clickedPiece.piece.islower() and targetPiece.isupper()): # if the target square is the opposition
+                    if (draggedPiece.piece.isupper() and targetPiece.islower()) or (draggedPiece.piece.islower() and targetPiece.isupper()): # if the target square is the opposition
                         legalMoves.append((piece.row, piece.col+i*verticalDirection))
                         break
-                    elif (clickedPiece.piece.isupper() and targetPiece.isupper()) or (clickedPiece.piece.islower() and targetPiece.islower()):
+                    elif (draggedPiece.piece.isupper() and targetPiece.isupper()) or (draggedPiece.piece.islower() and targetPiece.islower()):
                         break
                 except:
                     pass
@@ -274,10 +312,10 @@ def isLegal(piece):
                     if (targetPiece == None):
                         legalMoves.append((piece.row+i*verticalDirection, piece.col))
 
-                    if (clickedPiece.piece.isupper() and targetPiece.islower()) or (clickedPiece.piece.islower() and targetPiece.isupper()): # if the target square is the opposition
+                    if (draggedPiece.piece.isupper() and targetPiece.islower()) or (draggedPiece.piece.islower() and targetPiece.isupper()): # if the target square is the opposition
                         legalMoves.append((piece.row+i*verticalDirection, piece.col))
                         break
-                    elif (clickedPiece.piece.isupper() and targetPiece.isupper()) or (clickedPiece.piece.islower() and targetPiece.islower()):
+                    elif (draggedPiece.piece.isupper() and targetPiece.isupper()) or (draggedPiece.piece.islower() and targetPiece.islower()):
                         break
                 except:
                     pass
@@ -296,12 +334,6 @@ def isLegal(piece):
                 except:
                     pass
 
-# if target piece != None
-# if targetnode == oppostie colour
-#   add to legalmoves
-#   break
-
-    print(f"for the point {piece.row, piece.col}, the legal moves are:{legalMoves}")
     return legalMoves
             
 def highlightLegalSquares(piece):
@@ -312,13 +344,25 @@ def highlightLegalSquares(piece):
         rect = pygame.Rect(row*BOXSIZE, col*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
         pygame.draw.rect(window, (18, 72, 181), rect)
 
+def movePiece(startrow, startcol, endrow, endcol):
+    print(f"{startrow, startcol} moved to {endrow, endcol}")
+    board[endcol][endrow] = board[startcol][startrow]
+    board[endcol][endrow].row = endrow
+    board[endcol][endrow].col = endcol
+    board[endcol][endrow].numberOfMoves += 1
+    pygame.time.delay(1000)
+    board[startcol][startrow] = Piece("!", startrow, startcol) # empty node
+
 ###################### getting starting board positions ######################
 
 FENinput = input('enter FEN notation code or type none: ')
 
-if FENinput == "none":#rnbqkbnr/pppppppp/8/8/rnbqkbnr/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+#normal chess starting position
+#rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
-    FENinput = "rnbqkbnr/pppppppp/8/8/3Bb3/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" ## code for the normal chess starting position
+if FENinput == "none":
+
+    FENinput = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" ## code for the normal chess starting position
     
 try:
     boardPositions, sideToMove, castlingAblility, enPassantTargetSquare, halfmoveClock, fullMoveCounter = FENinput.split(" ")
@@ -327,31 +371,17 @@ except:
 
 board = parseFEN(boardPositions)
 
-###############################################################################
-
-pygame.init()
-clock = pygame.time.Clock()
-window = pygame.display.set_mode((WIDTH, HEIGHT))
-
-drag = False
-clickedPieceSprite = blackKing
-clickedPiece = None
-
-startRow = 0 # the row/col of where the most recent piece has been moved from
-startCol = 0
-
 ################################## Main loop ##################################
 
 while True:
-    checkForPromotion()
-
     ## DRAW ##
     drawSquares()
 
-    if clickedPiece != None:
-        highlightLegalSquares(clickedPiece)
+    if draggedPiece != None:
+        highlightLegalSquares(draggedPiece)
 
     drawPieces()
+    checkForPromotion()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
@@ -361,35 +391,41 @@ while True:
         clickedRow = mousex//BOXSIZE
         clickedCol = mousey//BOXSIZE
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN: # begining of a drag
             if pygame.mouse.get_pressed() != (False, False, False):
                 drag = True
                 startRow = clickedRow
-                startCol = clickedCol
-                clickedPieceSprite = sprites[board[clickedCol][clickedRow].piece]
-                clickedPiece = board[clickedCol][clickedRow]
+                startCol = clickedCol # clicked col is the end  col
+                draggedPieceSprite = sprites[board[startCol][startRow].piece]
+                draggedPiece = board[startCol][startRow]
  
-        if event.type == pygame.MOUSEBUTTONUP:
+        if event.type == pygame.MOUSEBUTTONUP: # end of a drag
+            endRow = clickedRow
+            endCol = clickedCol
             drag = False
-            if clickedPiece != None:
-                if (clickedRow, clickedCol) in isLegal(clickedPiece):
-                    if 0 ==0:# (totalMoveNumber % 2 == 0 and clickedPiece.piece.isupper()) or (totalMoveNumber % 2 != 0 and clickedPiece.piece.islower()):
-                
-                        board[clickedCol][clickedRow] = clickedPiece
-                        board[clickedCol][clickedRow].row = clickedRow
-                        board[clickedCol][clickedRow].col = clickedCol
-                        board[clickedCol][clickedRow].numberOfMoves += 1
-                        board[startCol][startRow] = Piece("!", startRow, startCol) # empty node
-                        totalMoveNumber += 1
+            if draggedPiece != None:
+                if (endRow, endCol) in isLegal(draggedPiece):
+                    if (totalMoveNumber % 2 != 0 and draggedPiece.piece.islower()):
+                        movePiece(startRow, startCol, endRow, endCol)
+                        totalMoveNumber += 1 
+                        fullMoveNumber += 1
+                        drawSquares()
+                        drawPieces()
+                        pygame.display.update()
+                else:
+                    print(f'move to {(endRow, endCol)} is illegal')
         
-        if drag:
-            if clickedPieceSprite != "!":
-                window.blit(clickedPieceSprite, (mousex-22.5, mousey-22.5))
+        if drag: # if a piece is currently being dragged
+            if draggedPieceSprite != "!":
+                try:
+                    window.blit(draggedPieceSprite, (mousex-22.5, mousey-22.5)) # draw the dragged piece onto the mouse cursor 
+                except:
+                    pass
 
-    if clicked: # this checks whether the board has been clicked since startup
-        rect = pygame.Rect(clickedRow*BOXSIZE, clickedCol*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
-        pygame.draw.rect(window, (0, 128, 0), rect)
-
+        if (totalMoveNumber % 2 == 0): # if it is the computers turn (computer plays as white)
+            startRow, startCol, endRow, endCol = GetNextMove(getFEN(board))
+            movePiece(startRow, startCol, endRow, endCol)
+            totalMoveNumber += 1 
 
     clock.tick(20)
     pygame.display.update()
