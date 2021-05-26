@@ -1,4 +1,5 @@
 import pygame
+from pygame.constants import K_q, K_w
 
 from API import *
 check()
@@ -22,19 +23,19 @@ clicked = False ## whether or not a piece has been clicked
 totalMoveNumber = 0
 fullMoveNumber = 0
 
-blackBishop = pygame.image.load(r"Sprites\blackBishop.png")
-blackKing = pygame.image.load(r"Sprites\blackKing.png")
-blackKnight = pygame.image.load(r"Sprites\blackKnight.png")
-blackPawn = pygame.image.load(r"Sprites\blackPawn.png")
-blackQueen = pygame.image.load(r"Sprites\blackQueen.png")
-blackRook = pygame.image.load(r"Sprites\blackRook.png")
+blackBishop = pygame.image.load(r"Chess\Sprites\blackBishop.png")
+blackKing = pygame.image.load(r"Chess\Sprites\blackKing.png")
+blackKnight = pygame.image.load(r"Chess\Sprites\blackKnight.png")
+blackPawn = pygame.image.load(r"Chess\Sprites\blackPawn.png")
+blackQueen = pygame.image.load(r"Chess\Sprites\blackQueen.png")
+blackRook = pygame.image.load(r"Chess\Sprites\blackRook.png")
  
-whiteBishop = pygame.image.load(r"Sprites\whiteBishop.png")
-whiteKing = pygame.image.load(r"Sprites\whiteKing.png")
-whiteKnight = pygame.image.load(r"Sprites\whiteKnight.png")
-whitePawn = pygame.image.load(r"Sprites\whitePawn.png")
-whiteQueen = pygame.image.load(r"Sprites\whiteQueen.png")
-whiteRook = pygame.image.load(r"Sprites\whiteRook.png")
+whiteBishop = pygame.image.load(r"Chess\Sprites\whiteBishop.png")
+whiteKing = pygame.image.load(r"Chess\Sprites\whiteKing.png")
+whiteKnight = pygame.image.load(r"Chess\Sprites\whiteKnight.png")
+whitePawn = pygame.image.load(r"Chess\Sprites\whitePawn.png")
+whiteQueen = pygame.image.load(r"Chess\Sprites\whiteQueen.png")
+whiteRook = pygame.image.load(r"Chess\Sprites\whiteRook.png")
 
 sprites = {
     "p":blackPawn, "P":whitePawn,
@@ -66,6 +67,14 @@ class Piece:
         self.col = col
         self.piece = piece
         self.numberOfMoves = 0
+
+        if self.piece.isupper():
+            self.colour = "w"
+            self.oppositionColour = "b"
+        else:
+            self.colour = "b"
+            self.oppositionColour = "w"
+
 
 def getFEN(board):
     #return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
@@ -181,7 +190,7 @@ def Getpiece(row, col): #returns the piece in the given row and col
     else:
         return piece
 
-def isLegal(piece):  
+def isLegal(InputPiece):  
     # + row --> right
     # - row --> left
     # + col --> down
@@ -191,146 +200,153 @@ def isLegal(piece):
 
     legalMoves = []
 
-    if piece.piece == "P":
-        if piece.numberOfMoves == 0:
-            if Getpiece(piece.row, piece.col-2) == None: # forwards 2
-                legalMoves.append((piece.row, piece.col-2))
+    if InputPiece.piece == "P":
+        if InputPiece.numberOfMoves == 0:
+            if Getpiece(InputPiece.row, InputPiece.col-2) == None: # forwards 2
+                legalMoves.append((InputPiece.row, InputPiece.col-2))
 
-        targetPiece = Getpiece(piece.row, piece.col-1) # up 1
+        targetPiece = Getpiece(InputPiece.row, InputPiece.col-1) # up 1
         if targetPiece == None:
-            legalMoves.append((piece.row, piece.col-1))
+            legalMoves.append((InputPiece.row, InputPiece.col-1))
 
         try:
-            targetPiece = Getpiece(piece.row-1, piece.col-1) # up and left
+            targetPiece = Getpiece(InputPiece.row-1, InputPiece.col-1) # up and left
             if targetPiece != None:
                 if targetPiece.islower():
-                    legalMoves.append((piece.row-1, piece.col-1))
+                    legalMoves.append((InputPiece.row-1, InputPiece.col-1))
         except:
             pass
 
         try:
-            targetPiece = Getpiece(piece.row+1, piece.col-1) # up and right
+            targetPiece = Getpiece(InputPiece.row+1, InputPiece.col-1) # up and right
             if targetPiece != None:
                 if targetPiece.islower():
-                    legalMoves.append((piece.row+1, piece.col-1))
+                    legalMoves.append((InputPiece.row+1, InputPiece.col-1))
         except:
             pass
 
-    if piece.piece == "p": # i could probably combine this and the last check
-        if piece.numberOfMoves == 0:
-            if Getpiece(piece.row, piece.col+2) == None: # down 2
-                legalMoves.append((piece.row, piece.col+2))
+    if InputPiece.piece == "p": # i could probably combine this and the last check
+        if InputPiece.numberOfMoves == 0:
+            if Getpiece(InputPiece.row, InputPiece.col+2) == None: # down 2
+                legalMoves.append((InputPiece.row, InputPiece.col+2))
 
-        targetPiece = Getpiece(piece.row, piece.col+1) ## down 1
+        targetPiece = Getpiece(InputPiece.row, InputPiece.col+1) ## down 1
         if targetPiece == None:
-            legalMoves.append((piece.row, piece.col+1))
+            legalMoves.append((InputPiece.row, InputPiece.col+1))
 
         try:
-            targetPiece = Getpiece(piece.row-1, piece.col+1) # down 1 and left
+            targetPiece = Getpiece(InputPiece.row-1, InputPiece.col+1) # down 1 and left
             if targetPiece != None:
                 if targetPiece.isupper():
-                    legalMoves.append((piece.row-1, piece.col+1))
+                    legalMoves.append((InputPiece.row-1, InputPiece.col+1))
         except:
             pass
 
         try:
-            targetPiece = Getpiece(piece.row+1, piece.col+1) # down 1 and right
+            targetPiece = Getpiece(InputPiece.row+1, InputPiece.col+1) # down 1 and right
             if targetPiece != None:
                 if targetPiece.isupper():
-                    legalMoves.append((piece.row+1, piece.col+1))
+                    legalMoves.append((InputPiece.row+1, InputPiece.col+1))
         except:
             pass
 
         ## en passant
     #good
 
-    if piece.piece.lower() == "n":
+    if InputPiece.piece.lower() == "n":
         for i in range(-1, 2, 2):
             verticalDirection = i
-            possibleMoves = [(piece.row+1, piece.col-2*verticalDirection), (piece.row-1, piece.col-2*verticalDirection), (piece.row+2, piece.col-1*verticalDirection), (piece.row-2, piece.col-1*verticalDirection)]
+            possibleMoves = [(InputPiece.row+1, InputPiece.col-2*verticalDirection), (InputPiece.row-1, InputPiece.col-2*verticalDirection), (InputPiece.row+2, InputPiece.col-1*verticalDirection), (InputPiece.row-2, InputPiece.col-1*verticalDirection)]
             for j in possibleMoves:
                 try:
                     targetPiece = Getpiece(j[0], j[1])
-                    if (targetPiece == None) or (drag.piece.isupper() and targetPiece.islower()) or (draggedPiece.piece.islower() and targetPiece.isupper()): # up/down 2 right 1
+                    if (targetPiece == None) or (InputPiece.piece.isupper() and targetPiece.islower()) or (InputPiece.piece.islower() and targetPiece.isupper()): # up/down 2 right 1
                         legalMoves.append((j))
                 except:
                     pass
     #good
 
-    if piece.piece.lower() == "b" or piece.piece.lower() == "q":
+    if InputPiece.piece.lower() == "b" or InputPiece.piece.lower() == "q":
         for j in range(-1, 2, 2):
             verticalDirection = j       
             for i in range(1, 8):
                 try:
-                    targetPiece = Getpiece(piece.row+i, piece.col+i*verticalDirection)
+                    targetPiece = Getpiece(InputPiece.row+i, InputPiece.col+i*verticalDirection)
                     if (targetPiece == None):
-                        legalMoves.append((piece.row+i, piece.col+i*verticalDirection))
-                    if (draggedPiece.piece.isupper() and targetPiece.islower()) or (draggedPiece.piece.islower() and targetPiece.isupper()):
-                        legalMoves.append((piece.row+i, piece.col+i*verticalDirection))
+                        legalMoves.append((InputPiece.row+i, InputPiece.col+i*verticalDirection))
+                    if (InputPiece.piece.isupper() and targetPiece.islower()) or (InputPiece.piece.islower() and targetPiece.isupper()):
+                        legalMoves.append((InputPiece.row+i, InputPiece.col+i*verticalDirection))
                         break
-                    if (draggedPiece.piece.isupper() and targetPiece.isupper()) or (draggedPiece.piece.islower() and targetPiece.islower()):
+                    if (InputPiece.piece.isupper() and targetPiece.isupper()) or (InputPiece.piece.islower() and targetPiece.islower()):
                         break
                 except:
                     pass
             for i in range(1, 8):
                 try:
-                    targetPiece = Getpiece(piece.row-i, piece.col+i*verticalDirection)
+                    targetPiece = Getpiece(InputPiece.row-i, InputPiece.col+i*verticalDirection)
                     if (targetPiece == None):
-                        legalMoves.append((piece.row-i, piece.col+i*verticalDirection))
-                    if (draggedPiece.piece.isupper() and targetPiece.islower()) or (draggedPiece.piece.islower() and targetPiece.isupper()):
-                        legalMoves.append((piece.row-i, piece.col+i*verticalDirection))
+                        legalMoves.append((InputPiece.row-i, InputPiece.col+i*verticalDirection))
+                    if (InputPiece.piece.isupper() and targetPiece.islower()) or (InputPiece.piece.islower() and targetPiece.isupper()):
+                        legalMoves.append((InputPiece.row-i, InputPiece.col+i*verticalDirection))
                         break
-                    if (draggedPiece.piece.isupper() and targetPiece.isupper()) or (draggedPiece.piece.islower() and targetPiece.islower()):
+                    if (InputPiece.piece.isupper() and targetPiece.isupper()) or (InputPiece.piece.islower() and targetPiece.islower()):
                         break
                 except:
                     pass
     #not good
     
-    if piece.piece.lower() == "r" or piece.piece.lower() == "q":
+    if InputPiece.piece.lower() == "r" or InputPiece.piece.lower() == "q":
         for j in range(-1, 2, 2):
             verticalDirection = j
             for i in range(1, 8):
                 try: # down/up
-                    targetPiece = Getpiece(piece.row, piece.col+i*verticalDirection)
+                    targetPiece = Getpiece(InputPiece.row, InputPiece.col+i*verticalDirection)
                     if (targetPiece == None):
-                        legalMoves.append((piece.row, piece.col+i*verticalDirection))
+                        legalMoves.append((InputPiece.row, InputPiece.col+i*verticalDirection))
 
-                    if (draggedPiece.piece.isupper() and targetPiece.islower()) or (draggedPiece.piece.islower() and targetPiece.isupper()): # if the target square is the opposition
-                        legalMoves.append((piece.row, piece.col+i*verticalDirection))
+                    if (InputPiece.piece.isupper() and targetPiece.islower()) or (InputPiece.piece.islower() and targetPiece.isupper()): # if the target square is the opposition
+                        legalMoves.append((InputPiece.row, InputPiece.col+i*verticalDirection))
                         break
-                    elif (draggedPiece.piece.isupper() and targetPiece.isupper()) or (draggedPiece.piece.islower() and targetPiece.islower()):
+                    elif (InputPiece.piece.isupper() and targetPiece.isupper()) or (InputPiece.piece.islower() and targetPiece.islower()):
                         break
                 except:
                     pass
             for i in range(1, 8):
                 try: # left/right
-                    targetPiece = Getpiece(piece.row+i*verticalDirection, piece.col)
+                    targetPiece = Getpiece(InputPiece.row+i*verticalDirection, InputPiece.col)
                     if (targetPiece == None):
-                        legalMoves.append((piece.row+i*verticalDirection, piece.col))
+                        legalMoves.append((InputPiece.row+i*verticalDirection, InputPiece.col))
 
-                    if (draggedPiece.piece.isupper() and targetPiece.islower()) or (draggedPiece.piece.islower() and targetPiece.isupper()): # if the target square is the opposition
-                        legalMoves.append((piece.row+i*verticalDirection, piece.col))
+                    if (InputPiece.piece.isupper() and targetPiece.islower()) or (InputPiece.piece.islower() and targetPiece.isupper()): # if the target square is the opposition
+                        legalMoves.append((InputPiece.row+i*verticalDirection, InputPiece.col))
                         break
-                    elif (draggedPiece.piece.isupper() and targetPiece.isupper()) or (draggedPiece.piece.islower() and targetPiece.islower()):
+                    elif (InputPiece.piece.isupper() and targetPiece.isupper()) or (InputPiece.piece.islower() and targetPiece.islower()):
                         break
                 except:
                     pass
     #good
 
-    if piece.piece.lower() == "k":
+    if InputPiece.piece.lower() == "k":
         for i in range(-1, 2, 2):
             for j in range(-1, 2, 2):
                 try:
-                    if Getpiece(piece.row+i, piece.col+j) == None: # forward 1 right 2
-                            legalMoves.append((piece.row+i, piece.col+j))
-                    if Getpiece(piece.row-i, piece.col) == None: # forward 1 right 2
-                            legalMoves.append((piece.row-i, piece.col))
-                    if Getpiece(piece.row, piece.col-i) == None: # forward 1 right 2
-                            legalMoves.append((piece.row, piece.col-i))
+                    if Getpiece(InputPiece.row+i, InputPiece.col+j) == None: # forward 1 right 2
+                            legalMoves.append((InputPiece.row+i, InputPiece.col+j))
+                    if Getpiece(InputPiece.row-i, InputPiece.col) == None: # forward 1 right 2
+                            legalMoves.append((InputPiece.row-i, InputPiece.col))
+                    if Getpiece(InputPiece.row, InputPiece.col-i) == None: # forward 1 right 2
+                            legalMoves.append((InputPiece.row, InputPiece.col-i))
                 except:
                     pass
 
-    return legalMoves
+    legalMoves = list(legalMoves)
+    removedOutsideGrid = []
+
+    for move in legalMoves: # this is a temporary fix to remove possible moves that sit outside the 8x8 grid
+        if not(move[0] > 7 or move[0] < 0 or move[1] > 7 or move[1] < 0):
+            removedOutsideGrid.append(move)
+
+    return removedOutsideGrid
             
 def highlightLegalSquares(piece):
     legalmoves = isLegal(piece)
@@ -346,7 +362,6 @@ def movePiece(startrow, startcol, endrow, endcol):
     board[endcol][endrow].row = endrow
     board[endcol][endrow].col = endcol
     board[endcol][endrow].numberOfMoves += 1
-    pygame.time.delay(1000)
     board[startcol][startrow] = Piece("!", startrow, startcol) # empty node
 
 ###################### getting starting board positions ######################
@@ -371,10 +386,22 @@ except:
 
 board = parseFEN(boardPositions)
 
+###############################################################################
+
+def getAllLegalMoves(colour): # colour "b" or "w"
+    allLegalMoves = []
+    for row in board:
+        for item in row: # for each individual piece on the board
+            
+            if item.colour == colour: # if it is the desired colour
+                for legalmove in isLegal(item): # add each legalmove to the full list of legal moves for that colour
+                    allLegalMoves.append(legalmove)
+    return allLegalMoves
+
 ################################## Main loop ##################################
 
 while True:
-    ## DRAW ##
+    ## DRAW #
     drawSquares()
 
     if draggedPiece != None:
@@ -383,9 +410,16 @@ while True:
     drawPieces()
     checkForPromotion()
 
+    if (totalMoveNumber % 2 == 0): # if it is the computers turn (computer plays as white)
+        startRow, startCol, endRow, endCol = GetNextMove(getFEN(board))
+        movePiece(startRow, startCol, endRow, endCol)
+        totalMoveNumber += 1 
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             pygame.quit()
+
+        keys = pygame.key.get_pressed()
 
         mousex, mousey = pygame.mouse.get_pos()
         clickedRow = mousex//BOXSIZE
@@ -422,10 +456,20 @@ while True:
                 except:
                     pass
 
-        if (totalMoveNumber % 2 == 0): # if it is the computers turn (computer plays as white)
-            startRow, startCol, endRow, endCol = GetNextMove(getFEN(board))
-            movePiece(startRow, startCol, endRow, endCol)
-            totalMoveNumber += 1 
+        if keys[K_q]:
+            print('1')
+            for square in getAllLegalMoves("w"):
+                rect = pygame.Rect(square[0]*BOXSIZE, square[1]*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
+                pygame.draw.rect(window, (100, 100, 100), rect)
+            pygame.display.update()
+            pygame.time.delay(500)
+
+        if keys[K_w]:
+            for square in getAllLegalMoves("b"):
+                rect = pygame.Rect(square[0]*BOXSIZE, square[1]*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
+                pygame.draw.rect(window, (100, 100, 100), rect)
+            pygame.display.update()
+            pygame.time.delay(500)
 
     clock.tick(20)
     pygame.display.update()
