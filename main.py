@@ -1,5 +1,4 @@
 import pygame
-from pygame.constants import K_q, K_w
 
 from API import *
 check()
