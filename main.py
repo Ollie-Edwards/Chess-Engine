@@ -74,7 +74,6 @@ class Piece:
             self.colour = "b"
             self.oppositionColour = "w"
 
-
 def getFEN(board):
     #return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     prevRow = 0
@@ -126,6 +125,16 @@ def checkForPromotion():
                 board[piece.col][piece.row].piece = "Q"
             if piece.piece == "p" and piece.col == 7:
                 board[piece.col][piece.row].piece = "q"
+
+def getAllLegalMoves(colour): # colour "b" or "w"
+    allLegalMoves = []
+    for row in board:
+        for item in row: # for each individual piece on the board
+            
+            if item.colour == colour: # if it is the desired colour
+                for legalmove in isLegal(item): # add each legalmove to the full list of legal moves for that colour
+                    allLegalMoves.append(legalmove)
+    return allLegalMoves
 
 def drawpiece(piece, row, col):
     piece = pygame.transform.scale(piece, (BOXSIZE, BOXSIZE)) 
@@ -363,6 +372,21 @@ def movePiece(startrow, startcol, endrow, endcol):
     board[endcol][endrow].numberOfMoves += 1
     board[startcol][startrow] = Piece("!", startrow, startcol) # empty node
 
+def isInCheck(board, colour):
+    for row in range(8):
+        for col in range(8):
+            targetPiece = board[row][col]
+            if targetPiece.piece.lower() == "k" and targetPiece.colour == colour: # if target piece is a king AND if targetpeice is the correct colour 
+                oppositionColour = targetPiece.oppositionColour 
+                KingPosition = (col, row)
+
+    print('king pos: ',KingPosition)
+
+    if KingPosition in getAllLegalMoves(oppositionColour):
+        return True ## in check
+    else:
+        return False # not in check
+
 ###################### getting starting board positions ######################
 
 FENinput = input('enter FEN notation code or type none: ')
@@ -386,16 +410,6 @@ except:
 board = parseFEN(boardPositions)
 
 ###############################################################################
-
-def getAllLegalMoves(colour): # colour "b" or "w"
-    allLegalMoves = []
-    for row in board:
-        for item in row: # for each individual piece on the board
-            
-            if item.colour == colour: # if it is the desired colour
-                for legalmove in isLegal(item): # add each legalmove to the full list of legal moves for that colour
-                    allLegalMoves.append(legalmove)
-    return allLegalMoves
 
 ################################## Main loop ##################################
 
@@ -436,15 +450,15 @@ while True:
             endRow = clickedRow
             endCol = clickedCol
             drag = False
-            if draggedPiece != None:
-                if (endRow, endCol) in isLegal(draggedPiece):
-                    if (totalMoveNumber % 2 != 0 and draggedPiece.piece.islower()):
-                        movePiece(startRow, startCol, endRow, endCol)
+            if draggedPiece != None: # if draggedpece has been dropped
+                if (endRow, endCol) in isLegal(draggedPiece): # if the final square is legal
+                    if (totalMoveNumber % 2 != 0 and draggedPiece.piece.islower()): # if it is black's turn and the moved piece is black
+                        movePiece(startRow, startCol, endRow, endCol) # move the peice from start to finish
                         totalMoveNumber += 1 
                         fullMoveNumber += 1
                         drawSquares()
                         drawPieces()
-                        pygame.display.update()
+                        pygame.display.update() 
                 else:
                     print(f'move to {(endRow, endCol)} is illegal')
         
@@ -455,20 +469,8 @@ while True:
                 except:
                     pass
 
-        if keys[K_q]:
-            print('1')
-            for square in getAllLegalMoves("w"):
-                rect = pygame.Rect(square[0]*BOXSIZE, square[1]*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
-                pygame.draw.rect(window, (100, 100, 100), rect)
-            pygame.display.update()
-            pygame.time.delay(500)
-
-        if keys[K_w]:
-            for square in getAllLegalMoves("b"):
-                rect = pygame.Rect(square[0]*BOXSIZE, square[1]*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
-                pygame.draw.rect(window, (100, 100, 100), rect)
-            pygame.display.update()
-            pygame.time.delay(500)
+        if keys[pygame.K_a]:
+            isInCheck(board, "b")
 
     clock.tick(20)
     pygame.display.update()
