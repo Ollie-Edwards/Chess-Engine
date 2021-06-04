@@ -22,19 +22,19 @@ clicked = False ## whether or not a piece has been clicked
 totalMoveNumber = 0
 fullMoveNumber = 0
 
-blackBishop = pygame.image.load(r"Chess\Sprites\blackBishop.png")
-blackKing = pygame.image.load(r"Chess\Sprites\blackKing.png")
-blackKnight = pygame.image.load(r"Chess\Sprites\blackKnight.png")
-blackPawn = pygame.image.load(r"Chess\Sprites\blackPawn.png")
-blackQueen = pygame.image.load(r"Chess\Sprites\blackQueen.png")
-blackRook = pygame.image.load(r"Chess\Sprites\blackRook.png")
+blackBishop = pygame.image.load(r"Sprites\blackBishop.png")
+blackKing = pygame.image.load(r"Sprites\blackKing.png")
+blackKnight = pygame.image.load(r"Sprites\blackKnight.png")
+blackPawn = pygame.image.load(r"Sprites\blackPawn.png")
+blackQueen = pygame.image.load(r"Sprites\blackQueen.png")
+blackRook = pygame.image.load(r"Sprites\blackRook.png")
  
-whiteBishop = pygame.image.load(r"Chess\Sprites\whiteBishop.png")
-whiteKing = pygame.image.load(r"Chess\Sprites\whiteKing.png")
-whiteKnight = pygame.image.load(r"Chess\Sprites\whiteKnight.png")
-whitePawn = pygame.image.load(r"Chess\Sprites\whitePawn.png")
-whiteQueen = pygame.image.load(r"Chess\Sprites\whiteQueen.png")
-whiteRook = pygame.image.load(r"Chess\Sprites\whiteRook.png")
+whiteBishop = pygame.image.load(r"Sprites\whiteBishop.png")
+whiteKing = pygame.image.load(r"Sprites\whiteKing.png")
+whiteKnight = pygame.image.load(r"Sprites\whiteKnight.png")
+whitePawn = pygame.image.load(r"Sprites\whitePawn.png")
+whiteQueen = pygame.image.load(r"Sprites\whiteQueen.png")
+whiteRook = pygame.image.load(r"Sprites\whiteRook.png")
 
 sprites = {
     "p":blackPawn, "P":whitePawn,
@@ -126,7 +126,7 @@ def checkForPromotion():
             if piece.piece == "p" and piece.col == 7:
                 board[piece.col][piece.row].piece = "q"
 
-def getAllLegalMoves(colour): # colour "b" or "w"
+def getAllLegalMoves(board, colour): # colour "b" or "w"
     allLegalMoves = []
     for row in board:
         for item in row: # for each individual piece on the board
@@ -157,7 +157,7 @@ def drawSquares(): ## draw boxes
             rect = pygame.Rect(row*BOXSIZE, col*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
             pygame.draw.rect(window, colour, rect)
 
-def drawPieces():
+def drawPieces(board):
     for row in range(8):
         for col in range(8):
             letter = board[col][row].piece  # the character representation of the chess piece eg. k, n, p esc
@@ -364,7 +364,7 @@ def highlightLegalSquares(piece):
         rect = pygame.Rect(row*BOXSIZE, col*BOXSIZE, BOXSIZE, BOXSIZE) #left, top, width, height 
         pygame.draw.rect(window, (18, 72, 181), rect)
 
-def movePiece(startrow, startcol, endrow, endcol):
+def movePiece(board, startrow, startcol, endrow, endcol):
     print(f"{startrow, startcol} moved to {endrow, endcol}")
     board[endcol][endrow] = board[startcol][startrow]
     board[endcol][endrow].row = endrow
@@ -382,7 +382,7 @@ def isInCheck(board, colour):
 
     print('king pos: ',KingPosition)
 
-    if KingPosition in getAllLegalMoves(oppositionColour):
+    if KingPosition in getAllLegalMoves(board, oppositionColour):
         return True ## in check
     else:
         return False # not in check
@@ -397,6 +397,9 @@ window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 #normal chess starting position
 #rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+
+# check situation
+# 4kbnr/1B6/8/8/4B3/8/8/P2QK3 w - - 0 1
 
 if FENinput == "none":
 
@@ -420,12 +423,12 @@ while True:
     if draggedPiece != None:
         highlightLegalSquares(draggedPiece)
 
-    drawPieces()
+    drawPieces(board)
     checkForPromotion()
 
     if (totalMoveNumber % 2 == 0): # if it is the computers turn (computer plays as white)
         startRow, startCol, endRow, endCol = GetNextMove(getFEN(board))
-        movePiece(startRow, startCol, endRow, endCol)
+        movePiece(board, startRow, startCol, endRow, endCol)
         totalMoveNumber += 1 
 
     for event in pygame.event.get():
@@ -453,12 +456,29 @@ while True:
             if draggedPiece != None: # if draggedpece has been dropped
                 if (endRow, endCol) in isLegal(draggedPiece): # if the final square is legal
                     if (totalMoveNumber % 2 != 0 and draggedPiece.piece.islower()): # if it is black's turn and the moved piece is black
-                        movePiece(startRow, startCol, endRow, endCol) # move the peice from start to finish
-                        totalMoveNumber += 1 
-                        fullMoveNumber += 1
+
+                        testBoard = board
+                        movePiece(testBoard, startRow, startCol, endRow, endCol)
+
                         drawSquares()
-                        drawPieces()
+                        drawPieces(testBoard)
                         pygame.display.update() 
+
+                        if isInCheck(testBoard, "b") == True or isInCheck(board, "b") == True: 
+                            print("you're in check")
+
+                        else: #if isInCheck(testBoard, "b") == False and isInCheck(board, "b") == False:
+                            movePiece(testBoard, endRow, endCol, startRow, startCol)
+
+                            print('not in check')
+                            movePiece(board, startRow, startCol, endRow, endCol) # move the peice from start to finish
+                            totalMoveNumber += 1 
+                            fullMoveNumber += 1
+                            drawSquares()
+                            drawPieces(board)
+
+                            pygame.time.delay(2000)
+
                 else:
                     print(f'move to {(endRow, endCol)} is illegal')
         
@@ -473,4 +493,5 @@ while True:
             isInCheck(board, "b")
 
     clock.tick(20)
+
     pygame.display.update()
