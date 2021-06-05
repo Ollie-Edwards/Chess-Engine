@@ -16,6 +16,8 @@ pygame: `pip install pygame`
 - [ ] Homepage --> maybe change settings
 - [ ] A responsive resizable game window
 - [ ] Play against another person (definitely local + maybe online)
+- [ ] View certainty of a win / draw / loss from the computer
+- [ ] Have the option to load the engine locally, instead of using api
 
 ### Issues:
 [See issues section](https://github.com/Ollie-Edwards/Chess-Engine/issues)
