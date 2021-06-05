@@ -1,5 +1,4 @@
 import pygame
-import datetime
 
 from API import *
 check()
@@ -436,7 +435,6 @@ def isCheckmate(board, colour):
         return True 
     
     for move in legalKingMoves:
-        print('LOJBDOJGB', move)
         row = move[0]
         col = move[1]
         
