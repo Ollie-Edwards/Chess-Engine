@@ -13,7 +13,7 @@ pygame: `pip install pygame`
 
 ### Feaures to be added:
 - [ ] View pieces that have been taken
-- [ ] Check(mate) indicator
+- [x] Check(mate) indicator
 - [x] display current 'FEN' code on the screen
 
 ### Issues:
