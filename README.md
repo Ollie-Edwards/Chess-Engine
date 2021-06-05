@@ -13,6 +13,9 @@ pygame: `pip install pygame`
 - [ ] View pieces that have been taken
 - [x] Check(mate) indicator
 - [x] display current 'FEN' code on the screen
+- [ ] Homepage --> maybe change settings
+- [ ] A responsive resizable game window
+- [ ] Play against another person (definitely local + maybe online)
 
 ### Issues:
 [See issues section](https://github.com/Ollie-Edwards/Chess-Engine/issues)
