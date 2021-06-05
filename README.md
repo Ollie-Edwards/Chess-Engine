@@ -1,6 +1,8 @@
 # Chess-Engine
 A chess game GUI linked to the [stockfish chess engine](https://stockfishchess.org/) using [an API by albertputrapurnama](https://github.com/albertputrapurnama/stockfish-api)
 
+<img src="Chess-Engine-Screenshot.PNG" width="200" height="210">
+
 -----
 
 ### Required Libraries
